@@ -49,21 +49,31 @@ circle_points = []
 
 GENERATIONS = 10
 TIME_SCALE = 20
-REPLICATION_RATE = 1.7
+REPLICATION_RATE = 2
 
 red_space = np.linspace(0, 255, GENERATIONS)
 blue_space = np.linspace(255, 0, GENERATIONS)
 
+
+def point_offset(i, j, num_points):
+    return (i * (i-num_points)) / (num_points * num_points)
+
+
 num_points = 1
 for j in range(0, GENERATIONS):
     print(num_points)
-    rad_space = np.linspace(0, 360, num_points)
+    rad_space = np.linspace(0, 360, num_points + 1)
     for i in range(num_points):
         phi = radians(rad_space[i])
         circle_points.append(
             (
-                np.matrix([*pol2cart(num_points, phi), j * TIME_SCALE]),
-                (red_space[j], 0, blue_space[j]),
+                np.matrix(
+                    [
+                        *pol2cart(point_offset(i, j, num_points) * num_points, phi),
+                        j * TIME_SCALE,
+                    ]
+                ),
+                BLACK if i == 0 else (red_space[j], 0, blue_space[j]),
             )
         )
     num_points = ceil(REPLICATION_RATE * num_points)
