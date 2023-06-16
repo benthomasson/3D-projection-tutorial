@@ -56,7 +56,13 @@ blue_space = np.linspace(255, 0, GENERATIONS)
 
 
 def point_offset(i, j, num_points):
-    return (i * (i-num_points)) / (num_points * num_points)
+    #return ((i * (i-num_points)) / (num_points * num_points)) - 0.1
+    #return 0 if i == 0 1
+    #return 0.1 * (i - num_points / 2) / num_points
+    # linear centered on 0
+    return i*(num_points-i) / (num_points * num_points) * 5
+
+
 
 
 num_points = 1
@@ -70,6 +76,17 @@ for j in range(0, GENERATIONS):
                 np.matrix(
                     [
                         *pol2cart(point_offset(i, j, num_points) * num_points, phi),
+                        j * TIME_SCALE,
+                    ]
+                ),
+                BLACK if i == 0 else (red_space[j], 0, blue_space[j]),
+            )
+        )
+        circle_points.append(
+            (
+                np.matrix(
+                    [
+                        *pol2cart(num_points, phi),
                         j * TIME_SCALE,
                     ]
                 ),
