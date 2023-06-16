@@ -1,6 +1,7 @@
-import pygame
-import numpy as np
 from math import *
+
+import numpy as np
+import pygame
 from scipy.interpolate import interp1d
 
 WHITE = (255, 255, 255)
@@ -9,69 +10,80 @@ BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 BLACK = (0, 0, 0)
 
-WIDTH, HEIGHT = 800, 600
+WIDTH, HEIGHT = 1024, 768
 pygame.display.set_caption("3D projection in pygame!")
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 scale = 1
 
-circle_pos = [WIDTH/2, HEIGHT/2]  # x, y
+circle_pos = [WIDTH / 2, HEIGHT / 2]  # x, y
 
 angle = 0
 
 
-def polar2z(r,theta):
-    return r * np.exp( 1j * theta )
+def polar2z(r, theta):
+    return r * np.exp(1j * theta)
+
 
 def z2polar(z):
-    return ( np.abs(z), np.angle(z) )
+    return (np.abs(z), np.angle(z))
+
 
 def cart2pol(x, y):
     rho = np.sqrt(x**2 + y**2)
     phi = np.arctan2(y, x)
-    return(rho, phi)
+    return (rho, phi)
+
 
 def pol2cart(rho, phi):
     x = rho * np.cos(phi)
     y = rho * np.sin(phi)
-    return(x, y)
+    return (x, y)
+
 
 def radians(degrees):
     return degrees * np.pi / 180
 
+
 circle_points = []
 
-red_space = np.linspace(0, 255, 8)
-blue_space = np.linspace(255, 0, 8)
+GENERATIONS = 10
+TIME_SCALE = 20
+REPLICATION_RATE = 1.7
+
+red_space = np.linspace(0, 255, GENERATIONS)
+blue_space = np.linspace(255, 0, GENERATIONS)
 
 num_points = 1
-for j in range(0, 8):
+for j in range(0, GENERATIONS):
     print(num_points)
     rad_space = np.linspace(0, 360, num_points)
     for i in range(num_points):
         phi = radians(rad_space[i])
-        circle_points.append((np.matrix([*pol2cart(num_points, phi), j*10]),
-                              (red_space[j], 0, blue_space[j])))
-    num_points = ceil(2*num_points)
+        circle_points.append(
+            (
+                np.matrix([*pol2cart(num_points, phi), j * TIME_SCALE]),
+                (red_space[j], 0, blue_space[j]),
+            )
+        )
+    num_points = ceil(REPLICATION_RATE * num_points)
 
 points = circle_points
 
-projection_matrix = np.matrix([
-    [1, 0, 0],
-    [0, 1, 0],
-    [0, 0, 0],
-])
+projection_matrix = np.matrix(
+    [
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 0],
+    ]
+)
 
 
-projected_points = [
-    [n, n] for n in range(len(points))
-]
-
+projected_points = [[n, n] for n in range(len(points))]
 
 
 clock = pygame.time.Clock()
 while True:
-
     clock.tick(60)
     print(clock.get_fps())
 
@@ -86,23 +98,29 @@ while True:
 
     # update stuff
 
-    rotation_z = np.matrix([
-        [cos(angle), -sin(angle), 0],
-        [sin(angle), cos(angle), 0],
-        [0, 0, 1],
-    ])
+    rotation_z = np.matrix(
+        [
+            [cos(angle), -sin(angle), 0],
+            [sin(angle), cos(angle), 0],
+            [0, 0, 1],
+        ]
+    )
 
-    rotation_y = np.matrix([
-        [cos(angle), 0, sin(angle)],
-        [0, 1, 0],
-        [-sin(angle), 0, cos(angle)],
-    ])
+    rotation_y = np.matrix(
+        [
+            [cos(angle), 0, sin(angle)],
+            [0, 1, 0],
+            [-sin(angle), 0, cos(angle)],
+        ]
+    )
 
-    rotation_x = np.matrix([
-        [1, 0, 0],
-        [0, cos(angle), -sin(angle)],
-        [0, sin(angle), cos(angle)],
-    ])
+    rotation_x = np.matrix(
+        [
+            [1, 0, 0],
+            [0, cos(angle), -sin(angle)],
+            [0, sin(angle), cos(angle)],
+        ]
+    )
     angle += 0.01
 
     screen.fill(WHITE)
