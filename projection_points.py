@@ -13,7 +13,7 @@ WIDTH, HEIGHT = 800, 600
 pygame.display.set_caption("3D projection in pygame!")
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
-scale = 100
+scale = 1
 
 circle_pos = [WIDTH/2, HEIGHT/2]  # x, y
 
@@ -41,14 +41,18 @@ def radians(degrees):
 
 circle_points = []
 
-red_space = np.linspace(0, 255, 10)
-blue_space = np.linspace(255, 0, 10)
+red_space = np.linspace(0, 255, 8)
+blue_space = np.linspace(255, 0, 8)
 
-for j in range(0, 10):
-    j = float(j) / 10.0
-    for i in range(0, 360, 10):
-        circle_points.append((np.matrix([*pol2cart(j*j, radians(i)), j]),
-                              (red_space[int(j*10)], 0, blue_space[int(j*10)])))
+num_points = 1
+for j in range(0, 8):
+    print(num_points)
+    rad_space = np.linspace(0, 360, num_points)
+    for i in range(num_points):
+        phi = radians(rad_space[i])
+        circle_points.append((np.matrix([*pol2cart(num_points, phi), j*10]),
+                              (red_space[j], 0, blue_space[j])))
+    num_points = ceil(2*num_points)
 
 points = circle_points
 
@@ -116,7 +120,7 @@ while True:
         y = int(projected2d[1][0] * scale) + circle_pos[1]
 
         projected_points[i] = [x, y]
-        pygame.draw.circle(screen, color, (x, y), 5)
+        pygame.draw.circle(screen, color, (x, y), 2)
         i += 1
 
     pygame.display.update()
