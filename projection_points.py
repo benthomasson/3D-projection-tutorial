@@ -1,9 +1,12 @@
 import pygame
 import numpy as np
 from math import *
+from scipy.interpolate import interp1d
 
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
+BLUE = (0, 0, 255)
+GREEN = (0, 255, 0)
 BLACK = (0, 0, 0)
 
 WIDTH, HEIGHT = 800, 600
@@ -16,18 +19,38 @@ circle_pos = [WIDTH/2, HEIGHT/2]  # x, y
 
 angle = 0
 
-points = []
 
-# all the cube vertices
-points.append(np.matrix([-1, -1, 1]))
-points.append(np.matrix([1, -1, 1]))
-points.append(np.matrix([1,  1, 1]))
-points.append(np.matrix([-1, 1, 1]))
-points.append(np.matrix([-1, -1, -1]))
-points.append(np.matrix([1, -1, -1]))
-points.append(np.matrix([1, 1, -1]))
-points.append(np.matrix([-1, 1, -1]))
+def polar2z(r,theta):
+    return r * np.exp( 1j * theta )
 
+def z2polar(z):
+    return ( np.abs(z), np.angle(z) )
+
+def cart2pol(x, y):
+    rho = np.sqrt(x**2 + y**2)
+    phi = np.arctan2(y, x)
+    return(rho, phi)
+
+def pol2cart(rho, phi):
+    x = rho * np.cos(phi)
+    y = rho * np.sin(phi)
+    return(x, y)
+
+def radians(degrees):
+    return degrees * np.pi / 180
+
+circle_points = []
+
+red_space = np.linspace(0, 255, 10)
+blue_space = np.linspace(255, 0, 10)
+
+for j in range(0, 10):
+    j = float(j) / 10.0
+    for i in range(0, 360, 10):
+        circle_points.append((np.matrix([*pol2cart(j*j, radians(i)), j]),
+                              (red_space[int(j*10)], 0, blue_space[int(j*10)])))
+
+points = circle_points
 
 projection_matrix = np.matrix([
     [1, 0, 0],
@@ -41,15 +64,12 @@ projected_points = [
 ]
 
 
-def connect_points(i, j, points):
-    pygame.draw.line(
-        screen, BLACK, (points[i][0], points[i][1]), (points[j][0], points[j][1]))
-
 
 clock = pygame.time.Clock()
 while True:
 
     clock.tick(60)
+    print(clock.get_fps())
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -85,7 +105,7 @@ while True:
     # drawining stuff
 
     i = 0
-    for point in points:
+    for point, color in points:
         rotated2d = np.dot(rotation_z, point.reshape((3, 1)))
         rotated2d = np.dot(rotation_y, rotated2d)
         rotated2d = np.dot(rotation_x, rotated2d)
@@ -96,12 +116,7 @@ while True:
         y = int(projected2d[1][0] * scale) + circle_pos[1]
 
         projected_points[i] = [x, y]
-        pygame.draw.circle(screen, RED, (x, y), 5)
+        pygame.draw.circle(screen, color, (x, y), 5)
         i += 1
-
-    for p in range(4):
-        connect_points(p, (p+1) % 4, projected_points)
-        connect_points(p+4, ((p+1) % 4) + 4, projected_points)
-        connect_points(p, (p+4), projected_points)
 
     pygame.display.update()
