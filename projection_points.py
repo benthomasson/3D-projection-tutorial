@@ -54,28 +54,65 @@ REPLICATION_RATE = 2
 red_space = np.linspace(0, 255, GENERATIONS)
 blue_space = np.linspace(255, 0, GENERATIONS)
 
+MASSES = [0]
+
 
 def point_offset(i, j, num_points):
-    #return ((i * (i-num_points)) / (num_points * num_points)) - 0.1
-    #return 0 if i == 0 1
-    #return 0.1 * (i - num_points / 2) / num_points
+    # return ((i * (i-num_points)) / (num_points * num_points)) - 0.1
+    # return 0 if i == 0 1
+    # return 0.1 * (i - num_points / 2) / num_points
     # linear centered on 0
-    return i*(num_points-i) / (num_points * num_points) * 5
+    print(i * (num_points - i) / (num_points * num_points) * 4)
+    return i * (num_points - i) / (num_points * num_points) * 4
+    # return (
+    #    i
+    #    * i
+    #    * (i - num_points)
+    #    * (i - num_points)
+    #    * (i - num_points / 2)
+    #    * (i - num_points / 2)
+    #    / (num_points * num_points * num_points * num_points * num_points * num_points)
+    #    * 512
+    # )
 
 
+def simulate_masses(masses, num_points):
+    initial = [1 for _ in range(num_points)]
+    final = initial.copy()
+    for mass in masses:
+        final[mass] = 0.5
+        for i in range(int(num_points / 2)):
+            final[(mass + i + 1) % num_points] = min([
+                final[(mass + i + 1) % num_points],
+                (final[(mass + i) % num_points] + final[(mass + i + 2) % num_points])
+                / 2,
+            ])
+            final[(mass - i - 1) % num_points] = min([
+                final[(mass - i - 1) % num_points],
+                (final[(mass - i) % num_points] + final[(mass - i - 2) % num_points])
+                / 2,
+            ])
+    print(final)
+    return final
 
 
 num_points = 1
 for j in range(0, GENERATIONS):
     print(num_points)
     rad_space = np.linspace(0, 360, num_points + 1)
+    if num_points >= 4:
+        masses = [0, num_points // 2, 3 * num_points // 4, num_points // 4]
+    else:
+        masses = [0]
+    offsets = simulate_masses(masses, num_points)
     for i in range(num_points):
         phi = radians(rad_space[i])
         circle_points.append(
             (
                 np.matrix(
                     [
-                        *pol2cart(point_offset(i, j, num_points) * num_points, phi),
+                        *pol2cart(offsets[i] * num_points, phi),
+                        # *pol2cart(point_offset(i, j, num_points) * num_points, phi),
                         j * TIME_SCALE,
                     ]
                 ),
@@ -90,7 +127,7 @@ for j in range(0, GENERATIONS):
                         j * TIME_SCALE,
                     ]
                 ),
-                BLACK if i == 0 else (red_space[j], 0, blue_space[j]),
+                GREEN,
             )
         )
     num_points = ceil(REPLICATION_RATE * num_points)
@@ -112,7 +149,6 @@ projected_points = [[n, n] for n in range(len(points))]
 clock = pygame.time.Clock()
 while True:
     clock.tick(60)
-    print(clock.get_fps())
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
