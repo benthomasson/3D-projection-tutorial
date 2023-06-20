@@ -3,6 +3,7 @@ from math import *
 import numpy as np
 import pygame
 from scipy.interpolate import interp1d
+import os
 
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
@@ -11,7 +12,9 @@ GREEN = (0, 255, 0)
 BLACK = (0, 0, 0)
 
 WIDTH, HEIGHT = 1024, 768
-pygame.display.set_caption("3D projection in pygame!")
+pygame.display.set_caption(
+    os.path.splitext(os.path.basename(__file__))[0].replace("_", " ").title()
+)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 scale = 1
@@ -81,7 +84,7 @@ def simulate_masses(masses, num_points):
     final = initial.copy()
     for mass, offset in masses:
         final[mass] = offset
-        for j in range(100):
+        for j in range(10):
             for i in range(int(num_points / 2)):
                 final[(mass + i + 1) % num_points] = min(
                     [
@@ -113,11 +116,11 @@ for j in range(0, GENERATIONS):
     rad_space = np.linspace(0, 360, num_points + 1)
     if num_points >= 4:
         masses = [
-            (0, 0.5),
-            #(num_points // 64, 0.5),
-            (3 * num_points // 4, 0.5),
-            (num_points // 4, 0.5),
-            (num_points // 2, 0.5),
+            (0, 0.75),
+            (num_points // 64, 0.5),
+            #(3 * num_points // 4, 0.5),
+            #(num_points // 4, 0.5),
+            #(num_points // 2, 0.5),
         ]
     else:
         masses = [(0, 0.5)]
