@@ -41,14 +41,21 @@ def radians(degrees):
 
 circle_points = []
 
-red_space = np.linspace(0, 255, 10)
-blue_space = np.linspace(255, 0, 10)
+generations = 20
+nodes = 8
 
-for j in range(0, 10):
-    j = float(j) / 10.0
-    for i in range(0, 360, 10):
+red_space = np.linspace(255, 0, generations)
+blue_space = np.linspace(0, 0, generations)
+
+
+circle_points.append((np.matrix([0, 0, 0]), (255,0,0), 20))
+
+for j in range(0, generations):
+    j = float(j) / (1.0  * generations)
+    for i in range(0, 360, 360//nodes):
         circle_points.append((np.matrix([*pol2cart(j*j, radians(i)), j]),
-                              (red_space[int(j*10)], 0, blue_space[int(j*10)])))
+                              (red_space[int(j*10)], 0, blue_space[int(j*10)]),
+                              5))
 
 points = circle_points
 
@@ -105,7 +112,7 @@ while True:
     # drawining stuff
 
     i = 0
-    for point, color in points:
+    for point, color, size in points:
         rotated2d = np.dot(rotation_z, point.reshape((3, 1)))
         rotated2d = np.dot(rotation_y, rotated2d)
         rotated2d = np.dot(rotation_x, rotated2d)
@@ -116,7 +123,7 @@ while True:
         y = int(projected2d[1][0] * scale) + circle_pos[1]
 
         projected_points[i] = [x, y]
-        pygame.draw.circle(screen, color, (x, y), 5)
+        pygame.draw.circle(screen, color, (x, y), size)
         i += 1
 
     pygame.display.update()
