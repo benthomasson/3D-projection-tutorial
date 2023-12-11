@@ -47,7 +47,9 @@ def connect_points(i, j, points):
 
 
 clock = pygame.time.Clock()
+frame = 0
 while True:
+    frame += 1
 
     clock.tick(60)
 
@@ -104,4 +106,6 @@ while True:
         connect_points(p+4, ((p+1) % 4) + 4, projected_points)
         connect_points(p, (p+4), projected_points)
 
+
+    pygame.image.save(screen, f"screenshots/screenshot{frame:08}.png")
     pygame.display.update()

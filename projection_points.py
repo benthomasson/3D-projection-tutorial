@@ -2,6 +2,8 @@ from math import *
 
 import numpy as np
 import pygame
+from pygame_recorder import ScreenRecorder
+
 from scipy.interpolate import interp1d
 
 WHITE = (255, 255, 255)
@@ -9,6 +11,7 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 BLACK = (0, 0, 0)
+FPS = 60
 
 WIDTH, HEIGHT = 1024, 768
 pygame.display.set_caption("3D projection in pygame!")
@@ -164,17 +167,18 @@ projected_points = [[n, n] for n in range(len(points))]
 
 
 clock = pygame.time.Clock()
-while True:
-    clock.tick(60)
+run = True
+frame = 0
+while run:
+    frame += 1
+    clock.tick(FPS)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            pygame.quit()
-            exit()
+            run = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                pygame.quit()
-                exit()
+                run = False
 
     # update stuff
 
@@ -221,4 +225,8 @@ while True:
         pygame.draw.circle(screen, color, (x, y), 2)
         i += 1
 
+    pygame.image.save(screen, f"screenshots/screenshot{frame:08}.png")
     pygame.display.update()
+
+
+pygame.quit()

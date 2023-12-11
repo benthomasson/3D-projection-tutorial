@@ -206,7 +206,7 @@ while True:
     )
     angle += 0.01
 
-    screen.fill(WHITE)
+    screen.fill(BLACK)
     # drawining stuff
 
     i = 0
